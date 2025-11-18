@@ -69,29 +69,6 @@ def campaign_detail(campaign_id):
 
 # --- ROTAS DA FASE 4 ---
 
-# @main_bp.route('/campaign/new')
-# def new_campaign():
-#     """
-#     Mostra o formulário inicial para criar uma nova campanha.
-#     """
-#     return render_template('new_campaign.html')
-
-# @main_bp.route('/campaign/new')
-# def new_campaign():
-#     """
-#     Mostra o formulário inicial para criar uma nova campanha.
-#     (ATUALIZADO: Agora aceita 'subject' e 'theme' da URL
-#      para preencher o formulário ao "Editar")
-#     """
-#     # Pega os dados da URL (se existirem)
-#     subject_val = request.args.get('subject', '')
-#     theme_val = request.args.get('theme', '')
-#
-#     # Passa os valores para o template
-#     return render_template('new_campaign.html',
-#                            subject=subject_val,
-#                            theme=theme_val)
-
 @main_bp.route('/campaign/new')
 def new_campaign():
     """
@@ -110,63 +87,6 @@ def new_campaign():
                            theme=theme_val,
                            csv_filename=csv_filename_val, 
                            cta_url=cta_url_val) # <-- NOVO
-
-# @main_bp.route('/campaign/generate_preview', methods=['POST'])
-# def generate_preview():
-#     """
-#     Recebe o formulário (Assunto, Tema, CSV).
-#     1. Salva o CSV temporariamente.
-#     2. Chama a API do Gemini para gerar o HTML.
-#     3. Renderiza a mesma página, mas agora com a pré-visualização.
-#     """
-#     try:
-#         # 1. Pega os dados do formulário
-#         subject = request.form.get('subject')
-#         theme = request.form.get('theme')
-#         csv_file = request.files.get('leads_csv')
-#
-#         if not all([subject, theme, csv_file]):
-#             flash('Todos os campos são obrigatórios.', 'error')
-#             return redirect(url_for('main.new_campaign'))
-#
-#         # 2. Salva o CSV em um local seguro (pasta 'instance/uploads')
-#         # Gera um nome de arquivo aleatório para evitar conflitos
-#         random_hex = secrets.token_hex(8)
-#         _, f_ext = os.path.splitext(csv_file.filename)
-#         csv_filename = random_hex + f_ext
-#         
-#         # Garante que a pasta de upload exista
-#         upload_folder = os.path.join(current_app.instance_path, 'uploads')
-#         os.makedirs(upload_folder, exist_ok=True)
-#         
-#         csv_path = os.path.join(upload_folder, csv_filename)
-#         csv_file.save(csv_path)
-#
-#         # 3. Carrega as configurações de API do DB
-#         settings = get_settings_dict()
-#         api_key = settings.get('API_KEY')
-#         if not api_key:
-#             flash('Chave da API não configurada no Menu Admin.', 'error')
-#             return redirect(url_for('main.new_campaign'))
-#
-#         # 4. Chama nosso "motor" (core_logic) para gerar o HTML
-#         html_content = core_logic.generate_ai_html(api_key, theme)
-#         
-#         if not html_content:
-#             flash('Erro ao gerar HTML pela API (Timeout ou Erro 504). Tente novamente.', 'error')
-#             return redirect(url_for('main.new_campaign'))
-#         
-#         # 5. Sucesso! Renderiza a página novamente, passando os dados
-#         #    para a seção "4. Pré-visualização" do HTML.
-#         return render_template('new_campaign.html',
-#                                html_preview=html_content,
-#                                subject=subject,
-#                                theme=theme,
-#                                csv_filename=csv_filename) # Passa o nome do arquivo salvo
-#
-#     except Exception as e:
-#         flash(f'Ocorreu um erro inesperado: {e}', 'error')
-#         return redirect(url_for('main.new_campaign'))
 
 
 @main_bp.route('/campaign/generate_preview', methods=['POST'])
@@ -313,17 +233,25 @@ def send_campaign():
 
         except Exception as e:
             # Se o Redis estiver offline
-            flash(f'Erro ao conectar na fila do Redis: {e}', 'error')
-            # Desfaz o commit para não deixar a campanha "presa" no DB
-            db.session.rollback()
-            return redirect(url_for('main.new_campaign'))
+            # --- CORREÇÃO DE ARQUITETURA (Zumbi) ---
+            print(f"[Flask] Erro Crítico no Redis: {e}")
+            
+            new_camp.status = 'Erro de Sistema (Fila)'
+            for r in new_camp.recipients:
+                r.status = 'Não Enviado (Erro Fila)'
+            
+            db.session.commit() # Salva o status de erro
+            
+            flash(f'Campanha salva, mas NÃO enviada. Erro na fila: {e}', 'error')
+            return redirect(url_for('main.history'))
         # --- FIM DA LÓGICA DE FILA ---
 
         flash(f'Campanha aprovada e adicionada à fila! ({len(leads_df)} e-mails)', 'success')
         # (Na Fase 6, vamos redirecionar para a página de /historico)
-        return redirect(url_for('main.new_campaign'))
+        return redirect(url_for('main.history')) # Redireciona para o Histórico
 
     except Exception as e:
-        db.session.rollback() # Desfaz qualquer mudança no DB em caso de erro
+        db.session.rollback() # Desfaz qualquer mudança no DB em caso de erro geral
+        print(f"[Flask] Erro Geral: {e}")
         flash(f'Erro ao criar campanha: {e}', 'error')
-        return redirect(url_for('main.history'))
+        return redirect(url_for('main.new_campaign'))

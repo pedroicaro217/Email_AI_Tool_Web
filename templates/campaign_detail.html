@@ -13,7 +13,10 @@
         <li><strong>Tema (Prompt):</strong> {{ campaign.theme }}</li>
         <li><strong>URL do CTA:</strong> <a href="{{ campaign.cta_url }}" target="_blank">{{ campaign.cta_url }}</a></li>
         <li><strong>Status:</strong> {{ campaign.status }}</li>
-        <li><strong>Criada em:</strong> {{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</li>
+        <li>
+            <strong>Criada em:</strong> 
+            {{ campaign.created_at | datetimeformat }}
+        </li>
     </ul>
 
     <h2>Destinatários ({{ campaign.recipients|length }})</h2>

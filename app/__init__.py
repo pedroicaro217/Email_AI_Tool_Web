@@ -3,6 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from dotenv import load_dotenv
+import pytz
+from datetime import datetime
 
 # --- NOVO: Definir o caminho raiz do PROJETO ---
 # __file__ aponta para /app/__init__.py
@@ -39,7 +41,12 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'database.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # 3. Garante que a pasta 'instance' exista
+    # 3. Configuração do Redis (A CORREÇÃO)
+    # Lê do ambiente (que o Docker define como 'redis://redis:6379')
+    # Se não achar (rodando local), usa 'redis://localhost:6379'
+    app.config['REDIS_URL'] = os.environ.get('REDIS_URL', 'redis://localhost:6379')  # <-- ADICIONE ISTO
+
+    # 4. Garante que a pasta 'instance' exista
     try:
         os.makedirs(app.instance_path)
     except OSError:
@@ -57,5 +64,20 @@ def create_app():
         # Importa e registra as rotas
         from . import routes
         app.register_blueprint(routes.main_bp)
+        
+        # --- NOVO: Filtro de Data para Template ---
+    def format_datetime(value):
+        if value is None:
+            return ""
+        # Define o fuso horário local (Brasília)
+        local_tz = pytz.timezone('America/Sao_Paulo')
+        # O DB salva em UTC (sem info de fuso), então dizemos que é UTC
+        utc_dt = value.replace(tzinfo=pytz.utc)
+        # Converte para SP
+        local_dt = utc_dt.astimezone(local_tz)
+        return local_dt.strftime('%d/%m/%Y %H:%M')
 
-        return app
+    # Registra o filtro para usar no HTML
+    app.jinja_env.filters['datetimeformat'] = format_datetime
+
+    return app

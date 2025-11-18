@@ -24,7 +24,9 @@
                 <td>
                     <strong>{{ campaign.status }}</strong>
                 </td>
-                <td>{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    {{ campaign.created_at | datetimeformat }}
+                </td>
                 <td>
                     <a href="{{ url_for('main.campaign_detail', campaign_id=campaign.id) }}" class="btn btn-secondary">Ver Detalhes</a>
                 </td>

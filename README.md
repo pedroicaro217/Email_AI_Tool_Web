@@ -49,15 +49,52 @@ Como desenvolvedor principal, minha responsabilidade foi:
 * **Definir os Requisitos:** Guiar o projeto, identificar *features* (como o prompt condicional) e apontar falhas de UX (como a perda de estado ao editar).
 * **Validar a Arquitetura:** Analisar as soluções propostas pela IA, questioná-las e adaptá-las (como a mudança do `Worker` padrão para o `SimpleWorker` para compatibilidade com Windows).
 * **Testar e Depurar:** Este **não** foi um processo de "copiar e colar". Cada linha de código sugerida pela IA foi rigorosamente validada, testada e depurada. A resolução de erros (como os `504` da API, erros de migração do DB e *constraints* de `UNIQUE`) foi um esforço conjunto de depuração e validação humana.
-* **Concluir a programação** Realizar a versão final do codigo, juntando o bloco inicial, com o versão testada e depurada.
+* **Engenharia Final:** Realizar a versão final do código, juntando o bloco inicial com a versão testada, depurada e conteinerizada.
 
 O resultado é um produto que reflete não apenas o poder da IA, mas a importância crucial do desenvolvedor em validar, testar e integrar o código de forma segura e robusta.
 
 ---
 
-## ⚙️ Instalação e Configuração
+## 🐳 Instalação e Execução (Via Docker) - Recomendado
 
-Siga os passos abaixo para rodar o projeto localmente.
+A aplicação foi totalmente "conteinerizada". Você não precisa instalar Python, Redis ou configurar ambientes virtuais manualmente. Basta ter o **Docker** e o **Docker Compose** instalados.
+
+### 1. Pré-requisitos
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando.
+
+### 2. Como Rodar (Comando Único)
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/pedroicaro217/Email_AI_Tool_Web.git](https://github.com/pedroicaro217/Email_AI_Tool_Web.git)
+    cd Email_AI_Tool_Web
+    ```
+
+2.  **Configure as Variáveis:**
+    ```bash
+    # Windows
+    copy .env.example .env
+    # Linux/Mac
+    cp .env.example .env
+    ```
+    *Edite o arquivo `.env` e defina sua `SECRET_KEY`.*
+
+3.  **Inicie a Aplicação:**
+    Execute este comando na raiz do projeto. O Docker irá baixar as dependências, configurar o banco de dados, iniciar o Redis, o Servidor Web e o Worker automaticamente.
+    ```bash
+    docker-compose up --build
+    ```
+
+4.  **Acesse:**
+    Abra seu navegador em **http://localhost:5000**.
+
+*(Nota: Na primeira execução, vá em "Configurações" para cadastrar sua API Key e SMTP, pois o banco de dados é criado novo).*
+
+---
+
+## ⚙️ Instalação Manual (Legado / Desenvolvimento)
+
+Siga os passos abaixo caso queira rodar o projeto localmente sem Docker.
 
 ### 1. Pré-requisitos (Windows)
 
@@ -99,8 +136,6 @@ Siga os passos abaixo para rodar o projeto localmente.
         ```
     * Teste se funcionou (no WSL): `redis-cli ping` (Deve responder `PONG`).
 
----
-
 ### 3. Instalação no Linux (Nativo)
 
 Se você estiver em um servidor ou desktop Linux.
@@ -111,84 +146,32 @@ Se você estiver em um servidor ou desktop Linux.
     sudo apt-get install git python3-venv redis-server -y
     ```
 
-2.  **Clone o repositório:**
+2.  **Clone e configure o ambiente:**
     ```bash
     git clone [https://github.com/pedroicaro217/Email_AI_Tool_Web.git](https://github.com/pedroicaro217/Email_AI_Tool_Web.git)
     cd Email_AI_Tool_Web
-    ```
-
-3.  **Crie e ative o ambiente virtual:**
-    ```bash
     python3 -m venv venv
     source venv/bin/activate
-    ```
-
-4.  **Instale as dependências Python:**
-    ```bash
     pip install -r requirements.txt
     ```
 
-5.  **Verifique se o Redis está rodando:**
+3.  **Verifique se o Redis está rodando:**
     ```bash
     sudo service redis-server status
     ```
-    (O serviço `redis-server` geralmente inicia automaticamente após a instalação no Linux).
 
----
+### 4. Configuração (Manual)
 
-### 4. Configuração (Ambos os Sistemas)
+1.  **Variáveis de Ambiente:** Copie o `.env.example` para `.env` e configure a `SECRET_KEY` e `REDIS_URL` (padrão: `redis://localhost:6379`).
+2.  **Banco de Dados:** Rode `flask db upgrade`.
+3.  **Credenciais:** Inicie o app e vá em `/admin` para salvar as chaves de API e SMTP.
 
-Após a instalação, configure a aplicação:
+## 🚀 Como Rodar (Modo Manual)
 
-1.  **Crie o arquivo `.env`:**
-    * Copie o template de exemplo:
-        ```bash
-        # Windows
-        copy .env.example .env
-        # Linux
-        cp .env.example .env
-        ```
-    * Edite o arquivo `.env` e adicione sua `SECRET_KEY` aleatória e o `REDIS_URL` (o padrão `redis://localhost:6379` deve funcionar).
+Para operar a aplicação manualmente, você precisa de **3 terminais** rodando simultaneamente.
 
-2.  **Crie o Banco de Dados:**
-    * Com o `venv` ativo, execute as migrações do Flask:
-        ```bash
-        flask db upgrade
-        ```
-    * *(Se for a primeira vez, pode ser necessário rodar `flask db init` e `flask db migrate` antes).*
-    * Isso criará o arquivo `instance/database.db`.
+1.  **Terminal 1:** Redis Server (via WSL ou Nativo).
+2.  **Terminal 2:** `python run.py` (Servidor Web).
+3.  **Terminal 3:** `python worker.py` (Trabalhador da Fila).
 
-3.  **Configure as Credenciais (Via Web):**
-    * Inicie o servidor Flask (veja "Como Rodar" abaixo).
-    * Abra o navegador e vá para `http://127.0.0.1:5000`.
-    * Você será redirecionado para o "Histórico". Clique em **"🔧 Configurações"** no menu.
-    * Preencha **todas** as credenciais (API Key do Gemini, dados do SMTP e o Nome da Empresa) e clique em "Salvar".
-
----
-
-## 🚀 Como Rodar
-
-Para operar a aplicação, você precisa de **3 terminais** rodando simultaneamente (no Windows: 1 WSL e 2 VSCode/CMD).
-
-1.  **Terminal 1: O Servidor Redis (A Fila)**
-    * Garanta que o serviço do Redis esteja rodando.
-    * (No Windows: Mantenha o terminal WSL aberto com `sudo service redis-server start`.)
-    * (No Linux: `sudo service redis-server status` para garantir que está no ar.)
-
-2.  **Terminal 2: O Servidor Web (Flask)**
-    * Abra um terminal na raiz do projeto.
-    * Ative o venv: `.\venv\Scripts\activate` (Windows) ou `source venv/bin/activate` (Linux).
-    * Inicie o Flask:
-        ```bash
-        python run.py
-        ```
-
-3.  **Terminal 3: O Trabalhador (Worker)**
-    * Abra um **novo** terminal na raiz do projeto.
-    * Ative o venv: `.\venv\Scripts\activate` (Windows) ou `source venv/bin/activate` (Linux).
-    * Inicie o worker do RQ (ele ficará "ouvindo"):
-        ```bash
-        python worker.py
-        ```
-
-Com os 3 terminais no ar, acesse `http://127.0.0.1:5000` no seu navegador para usar a aplicação.
+Com os 3 terminais no ar, acesse `http://127.0.0.1:5000`.

@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # --- Serviço 1: A Fila (Redis) ---
+  redis:
+    image: redis:alpine
+    container_name: email_marketer_redis
+    ports:
+      - "6379:6379"  # Opcional: permite acessar via WSL/Windows se precisar
+    volumes:
+      - redis_data:/data
+
+  # --- Serviço 2: O Site (Flask) ---
+  web:
+    build: .  # Constrói usando o Dockerfile desta pasta
+    container_name: email_marketer_web
+    command: python run.py
+    ports:
+      - "5000:5000"  # Expõe o site para o seu navegador (localhost:5000)
+    volumes:
+      - ./instance:/app/instance  # COMPARTILHA o banco de dados com seu PC
+    environment:
+      - REDIS_URL=redis://redis:6379  # IMPORTANTE: Aponta para o serviço 'redis' acima
+    env_file:
+      - .env  # Carrega suas chaves (API, SMTP)
+    depends_on:
+      - redis
+
+  # --- Serviço 3: O Trabalhador (Worker) ---
+  worker:
+    build: .  # Usa a mesma imagem do site
+    container_name: email_marketer_worker
+    command: python worker.py
+    volumes:
+      - ./instance:/app/instance  # Lê o MESMO banco de dados do site
+    environment:
+      - REDIS_URL=redis://redis:6379
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - web
+
+# Define volumes persistentes para o Redis
+volumes:
+  redis_data:

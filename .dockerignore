@@ -1,0 +1,25 @@
+# Ignorar o ambiente virtual local (o container criará o dele)
+venv/
+/venv
+
+# Ignorar arquivos de cache e compilação
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+.cache
+
+# Ignorar arquivos do Git
+.git
+.gitignore
+
+# Ignorar arquivos do sistema
+.DS_Store
+
+# Ignorar banco de dados local (vamos montar um volume para ele)
+instance/
+*.db
