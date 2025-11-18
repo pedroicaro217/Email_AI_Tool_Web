@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Campanhas - {{ super() }}{% endblock %}
+
+{% block content %}
+    <h1>📋 Histórico de Campanhas</h1>
+    <p>Veja o status de todas as campanhas, passadas e presentes. Clique em uma campanha para ver o status de cada destinatário.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Assunto</th>
+                <th>Status</th>
+                <th>Criada em</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for campaign in campaigns %}
+            <tr>
+                <td>{{ campaign.id }}</td>
+                <td>{{ campaign.subject }}</td>
+                <td>
+                    <strong>{{ campaign.status }}</strong>
+                </td>
+                <td>{{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('main.campaign_detail', campaign_id=campaign.id) }}" class="btn btn-secondary">Ver Detalhes</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">Nenhuma campanha encontrada. Crie uma!</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

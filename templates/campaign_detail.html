@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes: {{ campaign.subject }} - {{ super() }}{% endblock %}
+
+{% block content %}
+    <a href="{{ url_for('main.history') }}">&larr; Voltar para o Histórico</a>
+
+    <h1>Detalhes da Campanha #{{ campaign.id }}</h1>
+    
+    <h2>Informações</h2>
+    <ul>
+        <li><strong>Assunto:</strong> {{ campaign.subject }}</li>
+        <li><strong>Tema (Prompt):</strong> {{ campaign.theme }}</li>
+        <li><strong>URL do CTA:</strong> <a href="{{ campaign.cta_url }}" target="_blank">{{ campaign.cta_url }}</a></li>
+        <li><strong>Status:</strong> {{ campaign.status }}</li>
+        <li><strong>Criada em:</strong> {{ campaign.created_at.strftime('%d/%m/%Y %H:%M') }}</li>
+    </ul>
+
+    <h2>Destinatários ({{ campaign.recipients|length }})</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Status do Envio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in campaign.recipients %}
+            <tr>
+                <td>{{ r.nome }}</td>
+                <td>{{ r.email }}</td>
+                <td>
+                    <strong>{{ r.status }}</strong>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

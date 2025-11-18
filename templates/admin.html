@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Configurações - {{ super() }}{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1>🔧 Menu do Desenvolvedor (Configurações)</h1>
+        <p>Insira suas credenciais de API e SMTP. Elas serão salvas de forma segura no banco de dados.</p>
+
+        <form action="{{ url_for('main.admin') }}" method="POST">
+            <h3>Google Gemini API</h3>
+            <div class="form-group">
+                <label for="API_KEY">Chave da API (GOOGLE_API_KEY)</label>
+                <input type="password" id="API_KEY" name="API_KEY" value="{{ settings.get('API_KEY', '') }}">
+            </div>
+
+            <h3>Branding da Empresa</h3>
+            <div class="form-group">
+                <label for="COMPANY_NAME">Nome da Empresa</label>
+                <input type="text" id="COMPANY_NAME" name="COMPANY_NAME" value="{{ settings.get('COMPANY_NAME', '') }}">
+            </div>
+            <div class="form-group">
+                <label for="LOGO_URL">URL da Logo (opcional)</label>
+                <input type="text" id="LOGO_URL" name="LOGO_URL" value="{{ settings.get('LOGO_URL', '') }}">
+            </div>
+
+            <h3>Configuração SMTP</h3>
+            <div class="form-group">
+                <label for="SMTP_SERVER">Servidor SMTP</label>
+                <input type="text" id="SMTP_SERVER" name="SMTP_SERVER" value="{{ settings.get('SMTP_SERVER', 'smtp.gmail.com') }}">
+            </div>
+            <div class="form-group">
+                <label for="SMTP_PORT">Porta SMTP</label>
+                <input type="text" id="SMTP_PORT" name="SMTP_PORT" value="{{ settings.get('SMTP_PORT', '587') }}">
+            </div>
+            <div class="form-group">
+                <label for="SMTP_USER">Usuário SMTP (E-mail)</label>
+                <input type="text" id="SMTP_USER" name="SMTP_USER" value="{{ settings.get('SMTP_USER', '') }}">
+            </div>
+            <div class="form-group">
+                <label for="SMTP_PASS">Senha SMTP (Senha de App)</label>
+                <input type="password" id="SMTP_PASS" name="SMTP_PASS" value="{{ settings.get('SMTP_PASS', '') }}">
+            </div>
+
+            <button type="submit" class="btn">Salvar Configurações</button>
+        </form>
+    </div>
+{% endblock %}

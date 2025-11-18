@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Nova Campanha - {{ super() }}{% endblock %}
+{% block content %}
+    <div class="container">
+
+        <h1>🚀 Nova Campanha</h1>
+
+        <form action="{{ url_for('main.generate_preview') }}" method="POST" enctype="multipart/form-data">
+            
+            <h2>1. Detalhes</h2>
+            <div class="form-group">
+                <label for="subject">Assunto (Subject)</label>
+                <!-- Substituído: <input type="text" id="subject" name="subject" required> -->
+                <input type="text" id="subject" name="subject" value="{{ subject }}" required>
+            </div>
+            <div class="form-group">
+                <label for="theme">Tema (Prompt IA)</label>
+                <!-- Substituído: <textarea id="theme" name="theme" rows="3" required></textarea> -->
+                <textarea id="theme" name="theme" rows="3" required>{{ theme }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="cta_url">URL do Botão CTA (Obrigatório)</label>
+                <input type="url" id="cta_url" name="cta_url" value="{{ cta_url }}" placeholder="https://www.seusite.com/oferta" required>
+            </div>
+            <h2>2. Destinatários</h2>
+
+            <div class="form-group">
+            <label for="leads_csv">Arquivo de Leads (.csv)</label>
+            <input type="file" id="leads_csv" name="leads_csv" accept=".csv">
+
+            <input type="hidden" name="existing_csv_filename" value="{{ csv_filename }}">
+
+            {% if csv_filename %}
+                <p style="font-size: 0.9em; color: #555;">
+                    <strong>Arquivo ativo:</strong> {{ csv_filename }}
+                    <br>
+                    <em>(Deixe em branco para reutilizar este arquivo, ou envie um novo para substituí-lo)</em>
+                </p>
+            {% endif %}
+            </div>
+
+            <button type="submit" class="btn">3. Gerar Pré-visualização (via IA)</button>
+        </form>
+
+        {% if html_preview %}
+            <hr style="margin-top: 30px;">
+            <h2>4. Pré-visualização</h2>
+            <p>Revise o e-mail abaixo. Se estiver correto, aprove para enviar.</p>
+
+            <div id="preview-container">
+                <iframe id="html-preview" srcdoc="{{ html_preview }}"></iframe>
+            </div>
+            
+            <form action="{{ url_for('main.send_campaign') }}" method="POST" style="margin-top: 20px;">
+                <input type="hidden" name="subject" value="{{ subject }}">
+                <input type="hidden" name="theme" value="{{ theme }}">
+                <input type="hidden" name="cta_url" value="{{ cta_url }}"> <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+                <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
+                <input type="hidden" name="html_content" value="{{ html_preview }}">
+
+                <button type="submit" class="btn btn-success">5. APROVAR E ENVIAR</button>
+                <!-- Conservado como comentário:
+                <a href="{{ url_for('main.new_campaign') }}" class="btn btn-secondary">Descartar</a>
+                -->
+                <!-- <a href="{{ url_for('main.new_campaign', subject=subject, theme=theme) }}" class="btn btn-secondary">Editar (Ajustar Prompt)</a> -->
+                <a href="{{ url_for('main.new_campaign', subject=subject, theme=theme, csv_filename=csv_filename, cta_url=cta_url) }}" class="btn btn-secondary">Editar (Ajustar Prompt)</a>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}
