@@ -85,7 +85,13 @@ A aplicação foi totalmente "conteinerizada". Você não precisa instalar Pytho
     docker-compose up --build
     ```
 
-4.  **Acesse:**
+    ### 4. Inicialize o Banco de Dados (Apenas na primeira vez)
+    Com os contêineres rodando (abra um novo terminal), execute este comando para criar as tabelas:
+    ```bash
+    docker-compose exec web flask db upgrade
+    ````
+
+5.  **Acesse:**
     Abra seu navegador em **http://localhost:5000**.
 
 *(Nota: Na primeira execução, vá em "Configurações" para cadastrar sua API Key e SMTP, pois o banco de dados é criado novo).*
