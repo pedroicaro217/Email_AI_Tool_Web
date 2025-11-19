@@ -101,9 +101,7 @@ A aplicação foi totalmente "conteinerizada". Você não precisa instalar Pytho
 >
 > **Imediatamente após subir os contêineres**, você deve criar o Super Admin via terminal executando:
 
-    ```bash
     docker-compose exec web flask create-admin admin seu@email.com 123456
-    ````
 
 5.  **Acesse:**
     Abra seu navegador em **http://localhost:5000**.
