@@ -201,7 +201,8 @@ def send_campaign():
             theme=theme,
             cta_url=cta_url, # <-- NOVO
             generated_html=html_content,
-            status='Na Fila' # O Worker mudará isso
+            status='Na Fila', # O Worker mudará isso
+            user=current_user
         )
         db.session.add(new_camp)
         

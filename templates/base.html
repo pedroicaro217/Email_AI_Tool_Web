@@ -71,6 +71,7 @@
         <ul style="float: right; list-style: none; margin: 0;">
             {% if current_user.is_authenticated %}
                 <li style="color: #ccc; font-size: 0.9em;">Olá, {{ current_user.username }} ({{ current_user.role }})</li>
+                <li><a href="{{ url_for('auth.change_password') }}" style="font-size: 0.8em; color: #fff; text-decoration: underline;">Alterar Senha</a></li>
                 <li><a href="{{ url_for('auth.logout') }}" style="color: #ffcccc;">Sair ➜</a></li>
             {% endif %}
         </ul>

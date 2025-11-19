@@ -31,6 +31,9 @@ class Campaign(db.Model):
     generated_html = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(100), nullable=False, default='Pendente') # Ex: Pendente, Gerando, Enviando, Concluído
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user = db.relationship('User', backref='campaigns')
+    generated_html = db.Column(db.Text, nullable=True)
     
     # Relacionamento: Uma campanha tem muitos destinatários
     recipients = db.relationship('Recipient', backref='campaign', lazy=True, cascade="all, delete-orphan")

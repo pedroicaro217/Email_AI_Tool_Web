@@ -10,6 +10,13 @@
     <h2>Informações</h2>
     <ul>
         <li><strong>Assunto:</strong> {{ campaign.subject }}</li>
+        <li><strong>Criado por:</strong> 
+            {% if campaign.user %}
+                {{ campaign.user.username }} ({{ campaign.user.role }})
+            {% else %}
+                <span style="color: #999;">Desconhecido (Legado)</span>
+            {% endif %}
+        </li>        
         <li><strong>Tema (Prompt):</strong> {{ campaign.theme }}</li>
         <li><strong>URL do CTA:</strong> <a href="{{ campaign.cta_url }}" target="_blank">{{ campaign.cta_url }}</a></li>
         <li><strong>Status:</strong> {{ campaign.status }}</li>
