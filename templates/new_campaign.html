@@ -58,7 +58,13 @@
                 <input type="hidden" name="cta_url" value="{{ cta_url }}"> <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
                 <input type="hidden" name="csv_filename" value="{{ csv_filename }}">
                 <input type="hidden" name="html_content" value="{{ html_preview }}">
-
+                <input type="hidden" name="html_content" value="{{ html_preview }}">
+                <div style="margin-bottom: 15px; text-align: right; background: #e9ecef; padding: 10px; border-radius: 5px;">
+                    <label for="schedule_time" style="font-weight: bold; margin-right: 10px;">📅 Agendar para (Opcional):</label>
+                    <input type="datetime-local" id="schedule_time" name="schedule_time" style="padding: 5px;">
+                    <br>
+                    <small style="color: #666;">Deixe em branco para enviar agora.</small>
+                </div>
                 <button type="submit" class="btn btn-success">5. APROVAR E ENVIAR</button>
                 <!-- Conservado como comentário:
                 <a href="{{ url_for('main.new_campaign') }}" class="btn btn-secondary">Descartar</a>

@@ -34,6 +34,13 @@ class Campaign(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     user = db.relationship('User', backref='campaigns')
     generated_html = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    # --- NOVO: ID da tarefa no Redis (para poder cancelar depois) ---
+    job_id = db.Column(db.String(100), nullable=True)
+
+    # Guarda a data agendada (pode ser nula se for envio imediato)
+    scheduled_at = db.Column(db.DateTime, nullable=True)
     
     # Relacionamento: Uma campanha tem muitos destinatários
     recipients = db.relationship('Recipient', backref='campaign', lazy=True, cascade="all, delete-orphan")

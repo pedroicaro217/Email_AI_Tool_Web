@@ -11,6 +11,7 @@
             <tr>
                 <th>ID</th>
                 <th>Assunto</th>
+                <th>Autor</th>
                 <th>Status</th>
                 <th>Criada em</th>
                 <th>Ações</th>
@@ -21,9 +22,26 @@
             <tr>
                 <td>{{ campaign.id }}</td>
                 <td>{{ campaign.subject }}</td>
+                
+                <td>
+                    {% if campaign.user %}
+                        {{ campaign.user.username }}
+                    {% else %}
+                        <span style="color: #ccc;">-</span>
+                    {% endif %}
+                </td>
+
                 <td>
                     <strong>{{ campaign.status }}</strong>
+                    
+                    {% if campaign.status == 'Agendado' and campaign.scheduled_at %}
+                        <br>
+                        <small style="color: #007bff; font-weight: bold;">
+                            🕒 {{ campaign.scheduled_at | datetimeformat }}
+                        </small>
+                    {% endif %}
                 </td>
+
                 <td>
                     {{ campaign.created_at | datetimeformat }}
                 </td>
@@ -33,7 +51,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="5">Nenhuma campanha encontrada. Crie uma!</td>
+                <td colspan="6">Nenhuma campanha encontrada. Crie uma!</td>
             </tr>
             {% endfor %}
         </tbody>
