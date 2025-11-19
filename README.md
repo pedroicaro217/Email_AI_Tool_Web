@@ -85,10 +85,25 @@ A aplicação foi totalmente "conteinerizada". Você não precisa instalar Pytho
     docker-compose up --build
     ```
 
-    ### 4. Inicialize o Banco de Dados (Apenas na primeira vez)
+4. **Inicialize o Banco de Dados (Apenas na primeira vez)**
     Com os contêineres rodando (abra um novo terminal), execute este comando para criar as tabelas:
     ```bash
     docker-compose exec web flask db upgrade
+    ````
+
+    ## 🔐 Gestão de Acesso e Segurança (v2.0)
+
+    A partir da versão 2.0, o sistema conta com autenticação obrigatória e níveis de acesso (RBAC).
+
+    > [!IMPORTANT]
+    > **PASSO OBRIGATÓRIO: Criar o Primeiro Acesso**
+    >
+    > O sistema **não possui** usuários padrão (como `admin/admin`). Por segurança, a interface web não permite criar contas sem estar logado.
+    >
+    > **Imediatamente após subir os contêineres**, você deve criar o Super Admin via terminal executando:
+
+    ```bash
+    docker-compose exec web flask create-admin admin seu@email.com 123456
     ````
 
 5.  **Acesse:**

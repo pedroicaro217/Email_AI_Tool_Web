@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestão de Usuários - {{ super() }}{% endblock %}
+
+{% block content %}
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>👥 Gestão de Usuários</h1>
+        <a href="{{ url_for('main.new_user') }}" class="btn btn-success">+ Novo Usuário</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Usuário</th>
+                <th>E-mail</th>
+                <th>Cargo</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.role == 'admin' %}
+                        <span style="padding: 3px 8px; border-radius: 4px; background: #e2e3ff; color: #333;">Admin</span>
+                    {% else %}
+                        <span style="padding: 3px 8px; border-radius: 4px; background: #e2ffe3; color: #333;">Editor</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_active %}
+                        <span style="color: green;">● Ativo</span>
+                    {% else %}
+                        <span style="color: red;">● Bloqueado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.id != current_user.id %}
+                        
+                        {% if user.is_active %}
+                            <a href="{{ url_for('main.toggle_user', user_id=user.id) }}" class="btn btn-secondary" style="font-size: 0.8em;">Bloquear</a>
+                        {% else %}
+                            <a href="{{ url_for('main.toggle_user', user_id=user.id) }}" class="btn btn-success" style="font-size: 0.8em;">Ativar</a>
+                        {% endif %}
+
+                        <a href="{{ url_for('main.delete_user', user_id=user.id) }}" class="btn btn-danger" style="font-size: 0.8em;" onclick="return confirm('Tem certeza que deseja excluir este usuário?');">Excluir</a>
+                    
+                    {% else %}
+                        <small>(Você)</small>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

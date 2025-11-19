@@ -4,6 +4,7 @@ pandas
 google-generativeai
 Flask-SQLAlchemy
 Flask-Migrate
+flask-login
 rq
 redis
 pytz

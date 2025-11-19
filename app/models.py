@@ -1,5 +1,7 @@
 from app import db
 import datetime
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Settings(db.Model):
     """
@@ -49,3 +51,33 @@ class Recipient(db.Model):
 
     def __repr__(self):
         return f'<Recipient {self.email} (Campaign {self.campaign_id})>'
+
+class User(UserMixin, db.Model):
+    """
+    Tabela de Usuários com suporte a Login e Hash de Senha.
+    """
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True, nullable=False)
+    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+    
+    # Controle de Acesso (Role Based Access Control - RBAC)
+    role = db.Column(db.String(20), default='editor') # 'admin' ou 'editor'
+    is_active_user = db.Column(db.Boolean, default=True) # Para bloqueio
+
+    def set_password(self, password):
+        """Cria o hash da senha (criptografia)."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Verifica se a senha bate com o hash salvo."""
+        return check_password_hash(self.password_hash, password)
+    
+    # O Flask-Login exige essa propriedade para saber se pode logar
+    @property
+    def is_active(self):
+        return self.is_active_user
+
+    def __repr__(self):
+        return f'<User {self.username}>'

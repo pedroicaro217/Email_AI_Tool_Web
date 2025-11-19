@@ -1,10 +1,11 @@
 from flask import (
     Blueprint, render_template, request, flash, 
-    redirect, url_for, current_app
+    redirect, url_for, current_app, abort
 )
 from app import db
-from app.models import Settings, Campaign, Recipient
+from app.models import Settings, Campaign, Recipient, User
 from app import core_logic # <-- Importa nosso motor
+from flask_login import login_required, current_user
 import os
 import secrets # <-- Para gerar nomes de arquivo seguros
 import redis
@@ -18,6 +19,7 @@ def get_settings_dict():
     return {setting.key: setting.value for setting in settings_from_db}
 
 @main_bp.route('/')
+@login_required
 def index():
     """
     Rota principal (Homepage).
@@ -26,6 +28,7 @@ def index():
     return redirect(url_for('main.history'))
 
 @main_bp.route('/admin', methods=['GET', 'POST'])
+@login_required
 def admin():
     """Rota do Menu do Desenvolvedor (Fase 3)."""
     if request.method == 'POST':
@@ -46,6 +49,7 @@ def admin():
     return render_template('admin.html', settings=settings_dict)
 
 @main_bp.route('/history')
+@login_required
 def history():
     """
     Página principal (Dashboard) - Mostra todas as campanhas.
@@ -55,6 +59,7 @@ def history():
     return render_template('history.html', campaigns=campaigns)
 
 @main_bp.route('/campaign/<int:campaign_id>')
+@login_required
 def campaign_detail(campaign_id):
     """
     Mostra os detalhes de uma campanha específica (status de cada e-mail).
@@ -70,6 +75,7 @@ def campaign_detail(campaign_id):
 # --- ROTAS DA FASE 4 ---
 
 @main_bp.route('/campaign/new')
+@login_required
 def new_campaign():
     """
     Mostra o formulário inicial para criar uma nova campanha.
@@ -90,6 +96,7 @@ def new_campaign():
 
 
 @main_bp.route('/campaign/generate_preview', methods=['POST'])
+@login_required
 def generate_preview():
     """
     Recebe o formulário (Assunto, Tema, CSV).
@@ -174,6 +181,7 @@ def generate_preview():
         return redirect(url_for('main.new_campaign'))
 
 @main_bp.route('/campaign/send', methods=['POST'])
+@login_required
 def send_campaign():
     """
     Recebe o formulário "APROVAR E ENVIAR".
@@ -255,3 +263,75 @@ def send_campaign():
         print(f"[Flask] Erro Geral: {e}")
         flash(f'Erro ao criar campanha: {e}', 'error')
         return redirect(url_for('main.new_campaign'))
+
+# --- ROTAS DE GESTÃO DE USUÁRIOS (Fase 6) ---
+
+@main_bp.route('/users')
+@login_required
+def manage_users():
+    # Segurança: Só admin pode ver
+    if current_user.role != 'admin':
+        flash('Acesso negado.', 'error')
+        return redirect(url_for('main.history'))
+    
+    users = User.query.all()
+    return render_template('users.html', users=users)
+
+@main_bp.route('/users/new', methods=['GET', 'POST'])
+@login_required
+def new_user():
+    if current_user.role != 'admin':
+        flash('Acesso negado.', 'error')
+        return redirect(url_for('main.history'))
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        role = request.form.get('role')
+
+        # Validação simples
+        if User.query.filter((User.username == username) | (User.email == email)).first():
+            flash('Usuário ou E-mail já cadastrado.', 'error')
+            return redirect(url_for('main.new_user'))
+        
+        try:
+            user = User(username=username, email=email, role=role)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            flash(f'Usuário {username} criado com sucesso!', 'success')
+            return redirect(url_for('main.manage_users'))
+        except Exception as e:
+            flash(f'Erro ao criar usuário: {e}', 'error')
+
+    return render_template('new_user.html')
+
+@main_bp.route('/users/<int:user_id>/toggle')
+@login_required
+def toggle_user(user_id):
+    if current_user.role != 'admin': return redirect(url_for('main.history'))
+    if user_id == current_user.id: return redirect(url_for('main.manage_users')) # Não pode se bloquear
+
+    user = db.session.get(User, user_id)
+    if user:
+        user.is_active_user = not user.is_active_user # Inverte o status
+        db.session.commit()
+        status = "Ativado" if user.is_active_user else "Bloqueado"
+        flash(f'Usuário {user.username} foi {status}.', 'success')
+    
+    return redirect(url_for('main.manage_users'))
+
+@main_bp.route('/users/<int:user_id>/delete')
+@login_required
+def delete_user(user_id):
+    if current_user.role != 'admin': return redirect(url_for('main.history'))
+    if user_id == current_user.id: return redirect(url_for('main.manage_users'))
+
+    user = db.session.get(User, user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'Usuário {user.username} excluído.', 'success')
+    
+    return redirect(url_for('main.manage_users'))

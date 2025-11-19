@@ -53,11 +53,26 @@
 </head>
 <body>
     
-    <nav class="navbar">
-        <ul>
-            <li><a href="{{ url_for('main.history') }}" class="{% if request.endpoint == 'main.history' %}active{% endif %}">📋 Histórico</a></li>
-            <li><a href="{{ url_for('main.new_campaign') }}" class="{% if request.endpoint == 'main.new_campaign' %}active{% endif %}">🚀 Nova Campanha</a></li>
-            <li><a href="{{ url_for('main.admin') }}" class="{% if request.endpoint == 'main.admin' %}active{% endif %}">🔧 Configurações</a></li>
+<nav class="navbar">
+        <ul style="display: inline-block;">
+            {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('main.history') }}" class="{% if request.endpoint == 'main.history' %}active{% endif %}">📋 Histórico</a></li>
+                <li><a href="{{ url_for('main.new_campaign') }}" class="{% if request.endpoint == 'main.new_campaign' %}active{% endif %}">🚀 Nova Campanha</a></li>
+                
+                {% if current_user.role == 'admin' %}
+                <li><a href="{{ url_for('main.manage_users') }}" class="{% if request.endpoint == 'main.manage_users' %}active{% endif %}">👥 Usuários</a></li>
+                <li><a href="{{ url_for('main.admin') }}" class="{% if request.endpoint == 'main.admin' %}active{% endif %}">🔧 Configurações</a></li>
+                {% endif %}
+            {% else %}
+                <li>Arquiteto de E-mails</li>
+            {% endif %}
+        </ul>
+
+        <ul style="float: right; list-style: none; margin: 0;">
+            {% if current_user.is_authenticated %}
+                <li style="color: #ccc; font-size: 0.9em;">Olá, {{ current_user.username }} ({{ current_user.role }})</li>
+                <li><a href="{{ url_for('auth.logout') }}" style="color: #ffcccc;">Sair ➜</a></li>
+            {% endif %}
         </ul>
     </nav>
 
