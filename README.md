@@ -95,7 +95,7 @@ A aplicação foi totalmente "conteinerizada". Você não precisa instalar Pytho
 
     A partir da versão 2.0, o sistema conta com autenticação obrigatória e níveis de acesso (RBAC).
 
-    > [!IMPORTANT]
+    > [!TIP]
     > **PASSO OBRIGATÓRIO: Criar o Primeiro Acesso**
     >
     > O sistema **não possui** usuários padrão (como `admin/admin`). Por segurança, a interface web não permite criar contas sem estar logado.
