@@ -94,13 +94,12 @@ A aplicação foi totalmente "conteinerizada". Você não precisa instalar Pytho
     ## 🔐 Gestão de Acesso e Segurança (v2.0)
 
     A partir da versão 2.0, o sistema conta com autenticação obrigatória e níveis de acesso (RBAC).
-
-    > [!TIP]
-    > **PASSO OBRIGATÓRIO: Criar o Primeiro Acesso**
-    >
-    > O sistema **não possui** usuários padrão (como `admin/admin`). Por segurança, a interface web não permite criar contas sem estar logado.
-    >
-    > **Imediatamente após subir os contêineres**, você deve criar o Super Admin via terminal executando:
+> [!TIP]
+> **PASSO OBRIGATÓRIO: Criar o Primeiro Acesso**
+>
+> O sistema **não possui** usuários padrão (como `admin/admin`). Por segurança, a interface web não permite criar contas sem estar logado.
+>
+> **Imediatamente após subir os contêineres**, você deve criar o Super Admin via terminal executando:
 
     ```bash
     docker-compose exec web flask create-admin admin seu@email.com 123456
